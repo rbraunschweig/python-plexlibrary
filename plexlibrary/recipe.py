@@ -703,11 +703,14 @@ class Recipe():
             m['tmdb_vote_count'] = int(details['vote_count'])
             if self.library_type == 'movie':
                 if self.recipe['weighted_sorting']['better_release_date']:
-                    m['release_date'] = _get_non_theatrical_release(
-                        details['release_dates']) or \
-                                        datetime.datetime.strptime(
-                                            details['release_date'],
-                                            '%Y-%m-%d').date()
+                    try:
+                        m['release_date'] = _get_non_theatrical_release(
+                            details['release_dates']) or \
+                                            datetime.datetime.strptime(
+                                                details['release_date'],
+                                                '%Y-%m-%d').date()
+                    except (KeyError, TypeError, ValueError):
+                        m['release_date'] = today
                 else:
                     m['release_date'] = datetime.datetime.strptime(
                         details['release_date'], '%Y-%m-%d').date()
@@ -716,7 +719,7 @@ class Recipe():
                 try:
                     m['last_air_date'] = datetime.datetime.strptime(
                         details['last_air_date'], '%Y-%m-%d').date()
-                except TypeError:
+                except (KeyError, TypeError, ValueError):
                     m['last_air_date'] = today
                 item_age_td = today - m['last_air_date']
             m['genres'] = [g['name'].lower() for g in details['genres']]
